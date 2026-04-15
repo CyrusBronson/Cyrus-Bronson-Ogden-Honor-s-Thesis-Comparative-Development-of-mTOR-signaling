@@ -9,7 +9,6 @@ To run this code successfully, the following files must be present in the workin
 - `Axolotl.rds`
 - `Polypterus.rds`
 - `Zebrafish.rds`
-- `zebrafish_genenames_geneIDs.xlsx`
 
 Required R packages:
 
@@ -18,7 +17,6 @@ Required R packages:
 - `tidyr`
 - `ggplot2`
 - `tibble`
-- `readxl`
 
 Important:
 
@@ -27,12 +25,11 @@ Important:
   - Axolotl = `ax`
   - Polypterus = `ps`
   - Zebrafish = `zf`
-  - Zebrafish gene-ID mapping table = `zf_map`
 - The split UMAP code assumes the metadata column `Condition` exists in the object.
 
 ## Zebrafish Translation Notes
 
-The Zebrafish object uses `ENSDARG` identifiers rather than plain gene symbols, so the code translates displayed gene names through `zebrafish_genenames_geneIDs.xlsx`.
+The Zebrafish object uses `ENSDARG` identifiers rather than plain gene symbols. To make this code fully portable, the translations used in these figures are hardcoded directly below, so the Excel mapping file is not required.
 
 Common translations used in these figures:
 
@@ -57,20 +54,44 @@ Common translations used in these figures:
 ## Common Setup
 
 ```r
+install_if_missing <- function(pkgs) {
+  missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+  if (length(missing) > 0) install.packages(missing)
+}
+
+install_if_missing(c("Seurat", "dplyr", "tidyr", "ggplot2", "tibble"))
+
 library(Seurat)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(tibble)
-library(readxl)
 
 ax <- readRDS("Axolotl.rds")
 ps <- readRDS("Polypterus.rds")
 zf <- readRDS("Zebrafish.rds")
-zf_map <- read_excel("zebrafish_genenames_geneIDs.xlsx")
 
 if (!dir.exists("Plots")) dir.create("Plots")
 if (!dir.exists("Thesis Stuff")) dir.create("Thesis Stuff")
+
+zebrafish_id_map <- c(
+  IGF1RA = "ENSDARG00000027423",
+  IGF1RB = "ENSDARG00000034434",
+  IGF2R = "ENSDARG00000006094",
+  AKT1 = "ENSDARG00000099657",
+  AKT2 = "ENSDARG00000011219",
+  TSC1A = "ENSDARG00000026048",
+  TSC1B = "ENSDARG00000057918",
+  TSC2 = "ENSDARG00000103125",
+  RHEB = "ENSDARG00000090213",
+  MTOR = "ENSDARG00000053196",
+  RPTOR = "ENSDARG00000098726",
+  LAMTOR1 = "ENSDARG00000076464",
+  LAMTOR2 = "ENSDARG00000039872",
+  LAMTOR3 = "ENSDARG00000057075",
+  LAMTOR4 = "ENSDARG00000045542",
+  LAMTOR5 = "ENSDARG00000090194"
+)
 ```
 
 ## Helper for Figures 6-8. Full Heatmap Code
@@ -244,25 +265,23 @@ zebrafish_cluster_order <- c(
   "Myeloid cell", "Metaphocyte", "Pigment cell"
 )
 
-symbol_to_ens <- setNames(zf_map$Gene, toupper(zf_map$gene_names))
-
 zebrafish_gene_map <- c(
-  IGF1RA = symbol_to_ens["IGF1RA"],
-  IGF1RB = symbol_to_ens["IGF1RB"],
-  IGF2R = symbol_to_ens["IGF2R"],
-  AKT1 = symbol_to_ens["AKT1"],
-  AKT2 = symbol_to_ens["AKT2"],
-  TSC1A = symbol_to_ens["TSC1A"],
-  TSC1B = symbol_to_ens["TSC1B"],
-  TSC2 = symbol_to_ens["TSC2"],
-  RHEB = symbol_to_ens["RHEB"],
-  MTOR = symbol_to_ens["MTOR"],
-  RPTOR = symbol_to_ens["RPTOR"],
-  LAMTOR1 = symbol_to_ens["LAMTOR1"],
-  LAMTOR2 = symbol_to_ens["LAMTOR2"],
-  LAMTOR3 = symbol_to_ens["LAMTOR3"],
-  LAMTOR4 = symbol_to_ens["LAMTOR4"],
-  LAMTOR5 = symbol_to_ens["LAMTOR5"]
+  IGF1RA = zebrafish_id_map["IGF1RA"],
+  IGF1RB = zebrafish_id_map["IGF1RB"],
+  IGF2R = zebrafish_id_map["IGF2R"],
+  AKT1 = zebrafish_id_map["AKT1"],
+  AKT2 = zebrafish_id_map["AKT2"],
+  TSC1A = zebrafish_id_map["TSC1A"],
+  TSC1B = zebrafish_id_map["TSC1B"],
+  TSC2 = zebrafish_id_map["TSC2"],
+  RHEB = zebrafish_id_map["RHEB"],
+  MTOR = zebrafish_id_map["MTOR"],
+  RPTOR = zebrafish_id_map["RPTOR"],
+  LAMTOR1 = zebrafish_id_map["LAMTOR1"],
+  LAMTOR2 = zebrafish_id_map["LAMTOR2"],
+  LAMTOR3 = zebrafish_id_map["LAMTOR3"],
+  LAMTOR4 = zebrafish_id_map["LAMTOR4"],
+  LAMTOR5 = zebrafish_id_map["LAMTOR5"]
 )
 
 zebrafish_gene_map <- zebrafish_gene_map[!is.na(zebrafish_gene_map)]
@@ -374,18 +393,11 @@ ggsave("Thesis Stuff/Polypterus_TopEnrichedCellType_perGene.pdf", p_ps_top, widt
 ## Figure 11. Zebrafish Top Enriched Cell Type Per Gene
 
 ```r
-genes_zf_symbols <- c(
-  "igf1ra", "igf1rb", "igf2r", "akt1", "akt2",
-  "tsc1a", "tsc1b", "tsc2", "rheb", "mtor", "rptor",
-  "lamtor1", "lamtor2", "lamtor3", "lamtor4", "lamtor5"
-)
-
-symbol_to_ens <- setNames(zf_map$Gene, toupper(zf_map$gene_names))
-genes_zf_ens <- unname(symbol_to_ens[toupper(genes_zf_symbols)])
-genes_zf_ens <- genes_zf_ens[!is.na(genes_zf_ens)]
+genes_zf_symbols <- names(zebrafish_id_map)
+genes_zf_ens <- unname(zebrafish_id_map[genes_zf_symbols])
 
 res_zf_raw <- top_enriched_celltype(zf, genes_zf_ens, "Zebrafish")
-ens_to_symbol <- setNames(zf_map$gene_names, zf_map$Gene)
+ens_to_symbol <- setNames(names(zebrafish_id_map), zebrafish_id_map)
 
 res_zf <- res_zf_raw
 res_zf$top_table <- res_zf$top_table %>%
