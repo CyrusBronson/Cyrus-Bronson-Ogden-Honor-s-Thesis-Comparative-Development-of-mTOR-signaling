@@ -1,4 +1,3 @@
-[Figure_6_17_Code_Reference.md](https://github.com/user-attachments/files/26733997/Figure_6_17_Code_Reference.md)
 # Figure 6-17 Code Reference
 
 This document pulls together the recovered and reconstructed R code used for thesis Figures 6-17.
@@ -454,6 +453,8 @@ This helper produces one split UMAP across the day/condition column for a given 
 ```r
 plot_split_umap <- function(obj, feature_id, output_stem,
                             split_col,
+                            display_name = feature_id,
+                            split_order = NULL,
                             low_color = "lightgrey",
                             high_color = "magenta",
                             width = 14,
@@ -462,12 +463,19 @@ plot_split_umap <- function(obj, feature_id, output_stem,
     stop(paste0("Column '", split_col, "' was not found in metadata."))
   }
 
+  obj_plot <- obj
+  if (!is.null(split_order)) {
+    obj_plot[[split_col]] <- factor(obj_plot[[split_col]][, 1], levels = split_order)
+  }
+
   p <- FeaturePlot(
-    obj,
+    obj_plot,
     features = feature_id,
     split.by = split_col,
     cols = c(low_color, high_color)
   )
+
+  p <- p + ggtitle(display_name)
 
   ggsave(paste0(output_stem, ".png"), p, width = width, height = height, dpi = 300)
   ggsave(paste0(output_stem, ".pdf"), p, width = width, height = height)
@@ -481,13 +489,18 @@ plot_split_umap <- function(obj, feature_id, output_stem,
 # plot_split_umap(...)
 
 # Axolotl
-plot_split_umap(ax, "AKT2", "Thesis Stuff/Axolotl_AKT2_UMAP", split_col = "samples")
+plot_split_umap(
+  ax, "AKT2", "Thesis Stuff/Axolotl_AKT2_UMAP",
+  split_col = "samples",
+  display_name = "AKT2",
+  split_order = c("Am_0dpa", "Am_3dpa", "Am_7dpa", "Am_14dpa", "Am_22dpa")
+)
 
 # Polypterus
-plot_split_umap(ps, "akt2", "Thesis Stuff/Polypterus_akt2_UMAP", split_col = "Condition")
+plot_split_umap(ps, "akt2", "Thesis Stuff/Polypterus_akt2_UMAP", split_col = "Condition", display_name = "AKT2")
 
 # Zebrafish
-plot_split_umap(zf, "ENSDARG00000011219", "Thesis Stuff/Zebrafish_ENSDARG00000011219_akt2_UMAP", split_col = "Condition")
+plot_split_umap(zf, "ENSDARG00000011219", "Thesis Stuff/Zebrafish_ENSDARG00000011219_akt2_UMAP", split_col = "Condition", display_name = "AKT2")
 ```
 
 ## Figure 14. RPTOR UMAPs Across Days Post-Amputation
@@ -497,13 +510,18 @@ plot_split_umap(zf, "ENSDARG00000011219", "Thesis Stuff/Zebrafish_ENSDARG0000001
 # plot_split_umap(...)
 
 # Axolotl
-plot_split_umap(ax, "RPTOR", "Thesis Stuff/Axolotl_RPTOR_UMAP", split_col = "samples")
+plot_split_umap(
+  ax, "RPTOR", "Thesis Stuff/Axolotl_RPTOR_UMAP",
+  split_col = "samples",
+  display_name = "RPTOR",
+  split_order = c("Am_0dpa", "Am_3dpa", "Am_7dpa", "Am_14dpa", "Am_22dpa")
+)
 
 # Polypterus
-plot_split_umap(ps, "rptor", "Thesis Stuff/Polypterus_rptor_UMAP", split_col = "Condition")
+plot_split_umap(ps, "rptor", "Thesis Stuff/Polypterus_rptor_UMAP", split_col = "Condition", display_name = "RPTOR")
 
 # Zebrafish
-plot_split_umap(zf, "ENSDARG00000098726", "Thesis Stuff/Zebrafish_ENSDARG00000098726_rptor_UMAP", split_col = "Condition")
+plot_split_umap(zf, "ENSDARG00000098726", "Thesis Stuff/Zebrafish_ENSDARG00000098726_rptor_UMAP", split_col = "Condition", display_name = "RPTOR")
 ```
 
 ## Figure 15. LAMTOR3 UMAPs Across Days Post-Amputation
@@ -513,13 +531,18 @@ plot_split_umap(zf, "ENSDARG00000098726", "Thesis Stuff/Zebrafish_ENSDARG0000009
 # plot_split_umap(...)
 
 # Axolotl
-plot_split_umap(ax, "LAMTOR3", "Thesis Stuff/Axolotl_LAMTOR3_UMAP", split_col = "samples")
+plot_split_umap(
+  ax, "LAMTOR3", "Thesis Stuff/Axolotl_LAMTOR3_UMAP",
+  split_col = "samples",
+  display_name = "LAMTOR3",
+  split_order = c("Am_0dpa", "Am_3dpa", "Am_7dpa", "Am_14dpa", "Am_22dpa")
+)
 
 # Polypterus
-plot_split_umap(ps, "lamtor3", "Thesis Stuff/Polypterus_lamtor3_UMAP", split_col = "Condition")
+plot_split_umap(ps, "lamtor3", "Thesis Stuff/Polypterus_lamtor3_UMAP", split_col = "Condition", display_name = "LAMTOR3")
 
 # Zebrafish
-plot_split_umap(zf, "ENSDARG00000057075", "Thesis Stuff/Zebrafish_ENSDARG00000057075_lamtor3_UMAP", split_col = "Condition")
+plot_split_umap(zf, "ENSDARG00000057075", "Thesis Stuff/Zebrafish_ENSDARG00000057075_lamtor3_UMAP", split_col = "Condition", display_name = "LAMTOR3")
 ```
 
 ## Figure 16. LAMTOR4 UMAPs Across Days Post-Amputation
@@ -529,13 +552,18 @@ plot_split_umap(zf, "ENSDARG00000057075", "Thesis Stuff/Zebrafish_ENSDARG0000005
 # plot_split_umap(...)
 
 # Axolotl
-plot_split_umap(ax, "LAMTOR4", "Thesis Stuff/Axolotl_LAMTOR4_UMAP", split_col = "samples")
+plot_split_umap(
+  ax, "LAMTOR4", "Thesis Stuff/Axolotl_LAMTOR4_UMAP",
+  split_col = "samples",
+  display_name = "LAMTOR4",
+  split_order = c("Am_0dpa", "Am_3dpa", "Am_7dpa", "Am_14dpa", "Am_22dpa")
+)
 
 # Polypterus
-plot_split_umap(ps, "lamtor4", "Thesis Stuff/Polypterus_lamtor4_UMAP", split_col = "Condition")
+plot_split_umap(ps, "lamtor4", "Thesis Stuff/Polypterus_lamtor4_UMAP", split_col = "Condition", display_name = "LAMTOR4")
 
 # Zebrafish
-plot_split_umap(zf, "ENSDARG00000045542", "Thesis Stuff/Zebrafish_ENSDARG00000045542_lamtor4_UMAP", split_col = "Condition")
+plot_split_umap(zf, "ENSDARG00000045542", "Thesis Stuff/Zebrafish_ENSDARG00000045542_lamtor4_UMAP", split_col = "Condition", display_name = "LAMTOR4")
 ```
 
 ## Figure 17. IGF1R UMAPs Across Days Post-Amputation
@@ -545,13 +573,18 @@ plot_split_umap(zf, "ENSDARG00000045542", "Thesis Stuff/Zebrafish_ENSDARG0000004
 # plot_split_umap(...)
 
 # Axolotl
-plot_split_umap(ax, "IGF1R", "Thesis Stuff/Axolotl_IGF1R_UMAP", split_col = "samples")
+plot_split_umap(
+  ax, "IGF1R", "Thesis Stuff/Axolotl_IGF1R_UMAP",
+  split_col = "samples",
+  display_name = "IGF1R",
+  split_order = c("Am_0dpa", "Am_3dpa", "Am_7dpa", "Am_14dpa", "Am_22dpa")
+)
 
 # Polypterus
-plot_split_umap(ps, "LOC120541537", "Thesis Stuff/Polypterus_IGF1R_UMAP", split_col = "Condition")
+plot_split_umap(ps, "LOC120541537", "Thesis Stuff/Polypterus_IGF1R_UMAP", split_col = "Condition", display_name = "IGF1R")
 
 # Zebrafish
-plot_split_umap(zf, "ENSDARG00000027423", "Thesis Stuff/Zebrafish_ENSDARG00000027423_igf1r_UMAP", split_col = "Condition")
+plot_split_umap(zf, "ENSDARG00000027423", "Thesis Stuff/Zebrafish_ENSDARG00000027423_igf1r_UMAP", split_col = "Condition", display_name = "IGF1R")
 ```
 
 ## Notes
